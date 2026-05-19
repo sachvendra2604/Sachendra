@@ -1,27 +1,43 @@
-name: Update NSE Stocks to Google Sheet
+name: Update Sheet
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    # यह समय 14:45 UTC है, जिसका मतलब भारत में रात 8:15 PM है
-    - cron: '45 14 * * 1-5'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # Apne hisab se change kar sakte hain
+  workflow_dispatch: # Manual run karne ke liye
+
+env:
+  # Node.js 24 ko turant force karne ke liye
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   update-sheet:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      # Step 1: Latest v6 par upgrade kiya
+      - name: Checkout Repository
+        uses: actions/checkout@v6
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      # Step 2: Latest v6 par upgrade kiya
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: '3.11' # Apni Python version yahan likhein
+          cache: 'pip' # Optional: speed badhane ke liye
 
-      - name: Install Libraries
-        run: pip install gspread oauth2client pandas requests
+      # Step 3: Dependencies install karein
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run Python Script
+      # Step 4: Apna script run karein
+      - name: Run Update Script
         env:
-          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        run: python update_sheet.py
+          # Agar aapko Google Sheets API ki keys chahiye to yahan add karein
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          python your_script.py # Apne python file ka sahi naam yahan likhein
