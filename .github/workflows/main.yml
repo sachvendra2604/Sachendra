@@ -1,27 +1,36 @@
 name: Update NSE Stocks to Google Sheet
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    # यह समय 14:45 UTC है, जिसका मतलब भारत में रात 8:15 PM है
-    - cron: '45 14 * * 1-5'
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   update-sheet:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v6
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: Install Libraries
-        run: pip install gspread oauth2client pandas requests
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run Python Script
+      - name: Run Update Script
         env:
           GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
-        run: python update_sheet.py
+        run: |
+          python update_sheet.py  # <-- Humne yahan sahi naam daal diya hai
